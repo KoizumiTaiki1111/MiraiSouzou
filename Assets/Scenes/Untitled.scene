@@ -1,0 +1,58 @@
+Scene: Untitled
+Entities:
+  - Entity: 12884901888
+    Tag:
+      tag: New Entity(3)
+    Transform:
+      translate: [0, -2.88417196, 0]
+      rotation: [0, 0, 0]
+      scale: [4.80000019, 1, 4]
+    Mesh:
+      name: cube.obj
+      draw: true
+    Material:
+      roughness: 0.600000024
+      metallicness: 0
+      transparency: 1
+      albedo: [1, 1, 1]
+    RigidBody:
+      mass: 1
+      restitution: 1
+      static friction: 0.5
+      dynamic friction: 0.5
+      is trigger: false
+      is kinematic: false
+      scale is same as model: true
+      collider type: 0
+      collider shape: 0
+      body type: 0
+      entity: 12884901888
+      scale: [4.80000019, 1, 4]
+      radius: 1
+      half height: 0.5
+  - Entity: 8589934592
+    Tag:
+      tag: Main Camera
+    Camera3D:
+      eye position: [-7, 8, -14]
+      focus position: [0, 0, 0]
+      up vector: [0, 1, 0]
+      field of view: 45
+      aspect ratio: 1.77777779
+      nearZ: 1
+      farZ: 100
+      is runtime camera: false
+      is scene camera: true
+  - Entity: 4294967296
+    Tag:
+      tag: Runtime Camera
+    Camera3D:
+      eye position: [0, 0, -8]
+      focus position: [0, 0, 0]
+      up vector: [0, 1, 0]
+      field of view: 45
+      aspect ratio: 1.77777779
+      nearZ: 1
+      farZ: 100
+      is runtime camera: true
+      is scene camera: false
