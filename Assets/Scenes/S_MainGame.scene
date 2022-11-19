@@ -2,111 +2,6 @@ Scene: S_MainGame
 Entities:
   - Entity: 30064771072
     Tag:
-      tag: Runtime Camera
-    Camera3D:
-      eye position: [0, 1.5, -2.5]
-      focus position: [0, 0.5, 0]
-      up vector: [0, 1, 0]
-      field of view: 45
-      aspect ratio: 1.77777779
-      nearZ: 1
-      farZ: 100
-      is runtime camera: true
-      is scene camera: false
-  - Entity: 25769803776
-    Tag:
-      tag: Main Camera
-    Camera3D:
-      eye position: [0, 1.5, -2.5]
-      focus position: [0, 0.5, 0]
-      up vector: [0, 1, 0]
-      field of view: 45
-      aspect ratio: 1.77777779
-      nearZ: 1
-      farZ: 100
-      is runtime camera: false
-      is scene camera: true
-  - Entity: 21474836480
-    Tag:
-      tag: Stage
-    Transform:
-      translate: [0, 0, 0]
-      rotation: [0, 0, 0]
-      scale: [1, 0.100000001, 1]
-    Mesh:
-      name: cube.obj
-      draw: true
-    Material:
-      roughness: 0.600000024
-      metallicness: 0
-      transparency: 1
-      albedo: [1, 1, 1]
-    Script:
-      name: MoveObject.lua
-  - Entity: 17179869184
-    Tag:
-      tag: Nail
-    Transform:
-      translate: [0, 1, 0]
-      rotation: [0, 0, 0]
-      scale: [0.0500000007, 0.5, 0.0500000007]
-    Mesh:
-      name: cube.obj
-      draw: false
-    Material:
-      roughness: 0.600000024
-      metallicness: 0
-      transparency: 1
-      albedo: [1, 1, 1]
-    Script:
-      name: NailCrossHair.lua
-    RigidBody:
-      mass: 1
-      restitution: 1
-      static friction: 0.5
-      dynamic friction: 0.5
-      is trigger: false
-      is kinematic: true
-      scale is same as model: true
-      collider type: 0
-      collider shape: 0
-      body type: 1
-      entity: 17179869184
-      scale: [0.0500000007, 0.5, 0.0500000007]
-      radius: 1
-      half height: 0.5
-  - Entity: 12884901888
-    Tag:
-      tag: Hanmer
-    Transform:
-      translate: [0.225696713, -0.260030389, 0]
-      rotation: [0, 0, 0]
-      scale: [0.200000003, 0.100000001, 0.200000003]
-    Mesh:
-      name: cube.obj
-      draw: true
-    Material:
-      roughness: 0.600000024
-      metallicness: 0
-      transparency: 1
-      albedo: [1, 1, 1]
-  - Entity: 8589934592
-    Tag:
-      tag: bed
-    Transform:
-      translate: [-0.853741944, 0.246483624, -0.795609295]
-      rotation: [0, 0, 0]
-      scale: [0.100000001, 0.100000001, 0.200000003]
-    Mesh:
-      name: cube.obj
-      draw: true
-    Material:
-      roughness: 0.600000024
-      metallicness: 0
-      transparency: 1
-      albedo: [1, 1, 1]
-  - Entity: 4294967296
-    Tag:
       tag: p
     Transform:
       translate: [-0.794804633, 0.594282746, 0.762231529]
@@ -131,7 +26,97 @@ Entities:
       collider type: 1
       collider shape: 0
       body type: 1
-      entity: 4294967296
+      entity: 30064771072
       scale: [0.100000001, 0.100000001, 0.100000001]
       radius: 1
       half height: 0.5
+  - Entity: 25769803776
+    Tag:
+      tag: bed
+    Transform:
+      translate: [-0.853741944, 0.246483624, -0.795609295]
+      rotation: [0, 0, 0]
+      scale: [0.100000001, 0.100000001, 0.200000003]
+    Mesh:
+      name: cube.obj
+      draw: true
+    Material:
+      roughness: 0.600000024
+      metallicness: 0
+      transparency: 1
+      albedo: [1, 1, 1]
+  - Entity: 21474836480
+    Tag:
+      tag: Hanmer
+    Transform:
+      translate: [0.225696713, -0.260030389, 0]
+      rotation: [0, 0, 0]
+      scale: [0.200000003, 0.100000001, 0.200000003]
+    Mesh:
+      name: cube.obj
+      draw: true
+    Material:
+      roughness: 0.600000024
+      metallicness: 0
+      transparency: 1
+      albedo: [1, 1, 1]
+  - Entity: 17179869184
+    Tag:
+      tag: Nail
+    Transform:
+      translate: [0, 1, 0]
+      rotation: [0, 0, 0]
+      scale: [0.0500000007, 0.200000003, 0.0500000007]
+    Mesh:
+      name: cube.obj
+      draw: true
+    Material:
+      roughness: 0.600000024
+      metallicness: 0
+      transparency: 1
+      albedo: [1, 1, 1]
+    Script:
+      name: RayHitPresent.lua
+  - Entity: 12884901888
+    Tag:
+      tag: Stage
+    Transform:
+      translate: [0, 0, 0]
+      rotation: [0, 0, 0]
+      scale: [1, 0.100000001, 1]
+    Mesh:
+      name: cube.obj
+      draw: true
+    Material:
+      roughness: 0.600000024
+      metallicness: 0
+      transparency: 1
+      albedo: [1, 1, 1]
+    Script:
+      name: MoveObject.lua
+  - Entity: 8589934592
+    Tag:
+      tag: Main Camera
+    Camera3D:
+      eye position: [0, 1.5, -2.5]
+      focus position: [0, 0.5, 0]
+      up vector: [0, 1, 0]
+      field of view: 45
+      aspect ratio: 1.77777779
+      nearZ: 1
+      farZ: 100
+      is runtime camera: false
+      is scene camera: true
+  - Entity: 4294967296
+    Tag:
+      tag: Runtime Camera
+    Camera3D:
+      eye position: [0, 1.5, -2.5]
+      focus position: [0, 0.5, 0]
+      up vector: [0, 1, 0]
+      field of view: 45
+      aspect ratio: 1.77777779
+      nearZ: 1
+      farZ: 100
+      is runtime camera: true
+      is scene camera: false
