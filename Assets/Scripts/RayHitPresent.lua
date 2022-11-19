@@ -52,6 +52,7 @@ function RayHit()
             transforms.scale.y = 0.05
             transforms.scale.z = 0.05
             local s = GetComponent(e, "Script")
+            --LogMessage(s:Get("Type"))
             local ObjectType=s:Get("Type")
             local meshes = GetComponent(e, "Mesh")
             meshes:Load(fbxname[ObjectType])
