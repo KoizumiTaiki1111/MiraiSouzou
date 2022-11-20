@@ -8,6 +8,7 @@ local nextId = 0
 local once =false
 local time=0
 local Position_x=-0.9
+--LogMessage("")
 
 
 local fbxname={}
@@ -23,53 +24,127 @@ local ObjectType = [[
     local this = GetThis()
     value = 10
     Type = 10
+    Hit=false
+    HitAreaFlg=false
     local t2={}
-    t2["RayFront"]=Vector3D:new()
+    t2["RayFront2"]=Vector3D:new()
     function GetValue(x)
         return value * x
     end
 
-    function Start()
-        local m=math.random(1,4)
-        Type=m
-        t2["RayFront"].x=0
-        t2["RayFront"].y=-1
-        t2["RayFront"].z=0
+    function SetHit()
+       Hit=true
     end
 
-    function Update()
-        -- local transform = GetComponent(this, "Transform")
-        -- local e = Raycast(transform.translate, t2["RayFront"], 0.05)
+    function RotationHit()
+        -- local transforms = GetComponent(this, "Transform")
+        -- transforms.translate.y=transforms.translate.y+0.2
+        -- local e = Raycast(transforms.translate, t2["RayFront2"], 0.5)
+        -- transforms.translate.y=transforms.translate.y-0.2
         -- if e ~= 0 then
         --     material=GetComponent(this,"Material")
-        --     material.albedo.x=0
+        --     LogMessage("hit")
+        --     material.albedo.x=1
         --     material.albedo.y=0
-        --     material.albedo.z=1
+        --     material.albedo.z=0
         -- else
         --     material=GetComponent(this,"Material")
+        --     LogMessage("nohit")
         --     material.albedo.x=1
         --     material.albedo.y=1
         --     material.albedo.z=1
         -- end
     end
 
+    function HitArea()
+        local transforms = GetComponent(this, "Transform")
+        
+        if transforms.translate.z<1.0 and transforms.translate.z>0.8 then
+            HitAreaFlg=true
+        elseif transforms.translate.z>-1.0 and transforms.translate.z<-0.8 then
+            HitAreaFlg=true
+        elseif transforms.translate.x<1.0 and transforms.translate.x>0.8 then
+            HitAreaFlg=true
+        elseif transforms.translate.x>-1.0 and transforms.translate.x<-0.8 then
+            HitAreaFlg=true
+        elseif transforms.translate.x>-0.2 and transforms.translate.x<0.2 then
+            if transforms.translate.z>-0.2 and transforms.translate.z<0.2 then
+                HitAreaFlg=true
+            else
+                HitAreaFlg=false
+            end
+        else
+            HitAreaFlg=false
+        end
+
+        if transforms.translate.y<0.4 then
+            HitAreaFlg=false
+        end
+
+        if HitAreaFlg==true then
+            material=GetComponent(this,"Material")
+            material.albedo.x=0
+            material.albedo.y=0
+            material.albedo.z=1
+        else
+            material=GetComponent(this,"Material")
+            material.albedo.x=1
+            material.albedo.y=1
+            material.albedo.z=1
+        end
+    end 
+
+
+    function Start()
+        local m=math.random(1,4)
+        Type=m
+        t2["RayFront2"].x=0
+        t2["RayFront2"].y=1
+        t2["RayFront2"].z=0
+    end
+
+    function Update()
+        if AdHoc.Global.RotationFlg==false then
+            HitArea()
+        else
+            RotationHit()
+        end
+       
+      
+
+        local transforms = GetComponent(this, "Transform")
+        local tempRigidbody = GetComponent(this, "RigidBody")
+        if transforms.translate.z>1.0 then 
+            tempRigidbody:SetTranslation(transforms.translate.x, 0.5, -1.0 )
+            tempRigidbody:UpdateGeometry()
+        end
+
+        if AdHoc.Global.RotationFlg==true then
+            if transforms.translate.y>=0.5 then 
+                DestroyEntity(this)
+            end
+        end
+    end
+
     function TypeObject(_x)
         Type=_x
     end
 
-    function OnTriggerEnter(rhs)
-        material=GetComponent(this,"Material")
-        material.albedo.x=0
-        material.albedo.y=0
-        material.albedo.z=1
-    end
+    -- function OnTriggerEnter(rhs)
+    --     material=GetComponent(this,"Material")
+    --     material.albedo.x=0
+    --     material.albedo.y=0
+    --     material.albedo.z=1
+    -- end
 
-    function OnTriggerExit(rhs)
-        material=GetComponent(this,"Material")
-        material.albedo.x=1
-        material.albedo.y=1
-        material.albedo.z=1
-    end
+    -- function OnTriggerExit(rhs)
+    --     if AdHoc.Global.RotationFlg==false then
+    --         material=GetComponent(this,"Material")
+    --         material.albedo.x=1
+    --         material.albedo.y=1
+    --         material.albedo.z=1
+    --     end
+    -- end
 
     
 
@@ -102,17 +177,17 @@ function PopObject()
     -- end
     local Ramdom=math.random(0,2)
     if Ramdom==0 then
+        transforms.scale.x = 0.125
+        transforms.scale.y = 0.125
+        transforms.scale.z = 0.125
+    elseif Ramdom==1 then
         transforms.scale.x = 0.1
         transforms.scale.y = 0.1
         transforms.scale.z = 0.1
-    elseif Ramdom==1 then
+    else
         transforms.scale.x = 0.075
         transforms.scale.y = 0.075
         transforms.scale.z = 0.075
-    else
-        transforms.scale.x = 0.05
-        transforms.scale.y = 0.05
-        transforms.scale.z = 0.05
     end
     
     AddComponent(entities[nextId], "RigidBody", "Box", "Dynamic")
@@ -155,22 +230,28 @@ function Update()
     --     once=true
     -- end
     --位置のループ処理
-    for i = 0, nextId-1 do
-        local transforms = GetComponent(entities[i], "Transform")
-        local tempRigidbody = GetComponent(entities[i], "RigidBody")
-        if transforms.translate.z>1.0 then 
-            tempRigidbody:SetTranslation(transforms.translate.x, 0.5, -1.0 )
-            tempRigidbody:UpdateGeometry()
-        end
-    end
+    -- for i = 0, nextId-1 do
+    --     if entities[i]~=0 then 
+    --         local transforms = GetComponent(entities[i], "Transform")
+    --         local tempRigidbody = GetComponent(entities[i], "RigidBody")
+    --         if AdHoc.Global.RotationFlg==false then
+
+    --         else
+    --             if transforms.translate.y>0.4 then 
+    --                 DestroyEntity(entities[i])
+    --             end
+    --         end
+    --     end
+    -- end
    
 end
 
 function FixedUpdate()
     time=time+1
    if time>60 and  Position_x<0.9 then
+    if AdHoc.Global.RotationFlg==false then
     PopObject()
-    
     time=0
+    end
    end
 end

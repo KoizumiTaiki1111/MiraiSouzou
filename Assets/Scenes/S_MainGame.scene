@@ -4,7 +4,7 @@ Entities:
     Tag:
       tag: edgeleft
     Transform:
-      translate: [-0.899999976, 0.349999994, 0]
+      translate: [-1.23367238, 0.349999994, 0]
       rotation: [0, 0, 0]
       scale: [0.100000001, 0.100000001, 0.600000024]
     Mesh:
@@ -35,6 +35,8 @@ Entities:
   - Entity: 38654705664
     Tag:
       tag: Runtime Camera
+    Script:
+      name: FPSCamera.lua
     Camera3D:
       eye position: [0, 1.5, -2.5]
       focus position: [0, 0.5, 0]
@@ -49,8 +51,8 @@ Entities:
     Tag:
       tag: Main Camera
     Camera3D:
-      eye position: [0, 1.5, -2.5]
-      focus position: [0, 0.5, 0]
+      eye position: [0, 3.20000005, -0.00999999978]
+      focus position: [0, 0, 0]
       up vector: [0, 1, 0]
       field of view: 45
       aspect ratio: 1.77777779
@@ -92,6 +94,21 @@ Entities:
       albedo: [1, 1, 1]
     Script:
       name: RayHitPresent.lua
+    RigidBody:
+      mass: 1
+      restitution: 1
+      static friction: 0.5
+      dynamic friction: 0.5
+      is trigger: false
+      is kinematic: true
+      scale is same as model: true
+      collider type: 0
+      collider shape: 0
+      body type: 1
+      entity: 25769803776
+      scale: [0.0500000007, 0.200000003, 0.0500000007]
+      radius: 1
+      half height: 0.5
   - Entity: 21474836480
     Tag:
       tag: Hanmer
@@ -111,7 +128,7 @@ Entities:
     Tag:
       tag: edgefront
     Transform:
-      translate: [0, 0.349999994, 0.899999976]
+      translate: [0, 0.349999994, 1.21706581]
       rotation: [0, 0, 0]
       scale: [1, 0.100000001, 0.100000001]
     Mesh:
@@ -143,7 +160,7 @@ Entities:
     Tag:
       tag: edgeright
     Transform:
-      translate: [0.899999976, 0.349999994, 0]
+      translate: [1.27432358, 0.349999994, 0]
       rotation: [0, 0, 0]
       scale: [0.100000001, 0.100000001, 0.600000024]
     Mesh:
@@ -175,7 +192,7 @@ Entities:
     Tag:
       tag: edgeback
     Transform:
-      translate: [0, 0.349999994, -0.899999976]
+      translate: [0, 0.349999994, -1.213135]
       rotation: [0, 0, 0]
       scale: [1, 0.100000001, 0.100000001]
     Mesh:
@@ -207,7 +224,7 @@ Entities:
     Tag:
       tag: Center
     Transform:
-      translate: [0, 0.349999994, 0]
+      translate: [-1.81474078, 0.349999994, 0]
       rotation: [0, 0, 0]
       scale: [0.200000003, 0.100000001, 0.200000003]
     Mesh:
