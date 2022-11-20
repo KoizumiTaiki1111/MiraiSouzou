@@ -24,7 +24,7 @@ fbxname[4]="table.obj"
 
 function MoveCrossHair()
     local transform = GetComponent(this, "Transform")
-    local Speed=0.02
+    local Speed=0.01
     
     if input:GetKey(AdHoc.Key.w) then
         transform.translate.z = transform.translate.z + Speed
@@ -100,7 +100,7 @@ end
 function RayHitRotation()
     local transform = GetComponent(this, "Transform")
     transform.translate.y=transform.translate.y-(transform.scale.y+0.01)
-    local e = Raycast(transform.translate, t2["RayFront"], 0.6)
+    local e = Raycast(transform.translate, t2["RayFront"], 0.7)
     transform.translate.y=transform.translate.y+(transform.scale.y+0.01)
     if e ~= 0 then
         local m = GetComponent(this, "Material")
@@ -115,9 +115,9 @@ function RayHitRotation()
        
         Yangle= transform3.rotation.y
         if input:GetKeyUp(AdHoc.Key.j) then
-            Yangle=Yangle+0.2
+            Yangle=Yangle+0.1
         elseif input:GetKeyUp(AdHoc.Key.l) then
-            Yangle=Yangle-0.2
+            Yangle=Yangle-0.1
         end
 
         local tempRigidbody = GetComponent(e, "RigidBody")
