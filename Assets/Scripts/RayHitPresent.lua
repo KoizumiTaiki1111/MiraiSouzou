@@ -1,156 +1,160 @@
 require "AdHoc"
 
-local this = GetThis()
-local input = GetInput()
-local t2={}
-t2["RayFront"]=Vector3D:new()
-local MaxHitObject=6
-local HitObjectCnt=1
-local RotationFlg=false
-local Yangle=0
-local FPSflg=false
+local this         = GetThis()
+local input        = GetInput()
+local maxHitObject = 6
+local hitObjectCnt = 1
+local angleY       = 0
 
-local fbxname={}
-fbxname[1]="bed.obj"
-fbxname[2]="sofa_double.obj"
-fbxname[3]="table.obj"
-fbxname[4]="dai.obj"
+-- Global flags
+rotationFlg  = false
+FPSflg       = false
+
+AdHoc.Global.g_NailId = this
+
+local meshName = {}
+meshName[1]    = "bed.obj"
+meshName[2]    = "dai.obj"
+meshName[3]    = "sofa_double.obj"
+meshName[4]    = "table.obj"
+
+local downVector = Vector3D:new()
+downVector.x = 0
+downVector.y = -1
+downVector.z = 0
 
 function MoveCrossHair()
     local transform = GetComponent(this, "Transform")
-    local Speed=0.01
-    
+    local speed     = 1
+
+    -- Move
     if input:GetKey(AdHoc.Key.w) then
-        transform.translate.z = transform.translate.z + Speed
+        transform.translate.z = transform.translate.z + speed * DeltaTime()
     elseif input:GetKey(AdHoc.Key.s) then
-        transform.translate.z = transform.translate.z - Speed
+        transform.translate.z = transform.translate.z - speed * DeltaTime()
     elseif input:GetKey(AdHoc.Key.a) then
-        transform.translate.x = transform.translate.x - Speed
+        transform.translate.x = transform.translate.x - speed * DeltaTime()
     elseif input:GetKey(AdHoc.Key.d) then
-        transform.translate.x = transform.translate.x + Speed
+        transform.translate.x = transform.translate.x + speed * DeltaTime()
     end
 
-    if transform.translate.z>1 then
-        transform.translate.z=1
-    elseif transform.translate.z<-1 then
-        transform.translate.z=-1
+    -- Movement limit
+    if transform.translate.z > 1 then
+        transform.translate.z = 1
+    elseif transform.translate.z < -1 then
+        transform.translate.z = -1
     end
-    if transform.translate.x>1 then
-        transform.translate.x=1
-    elseif transform.translate.x<-1 then
-        transform.translate.x=-1
+    if transform.translate.x > 1 then
+        transform.translate.x = 1
+    elseif transform.translate.x < -1 then
+        transform.translate.x = -1
     end
 
-    local transforms = GetComponent(this, "Transform")
-    transforms.translate.x = transform.translate.x
-    transforms.translate.y = 1
-    transforms.translate.z = transform.translate.z
-    local tempRigidbody = GetComponent(this, "RigidBody")
-    tempRigidbody:SetTranslation(transforms.translate.x, transforms.translate.y, transforms.translate.z )
+    -- Update rigidbody location
+    local r = GetComponent(this, "RigidBody")
+    r:SetTranslation(transform.translate.x, transform.translate.y, transform.translate.z )
 end
 
 function RayHit()
     local transform = GetComponent(this, "Transform")
-    transform.translate.y=transform.translate.y-(transform.scale.y+0.01)
-    local e = Raycast(transform.translate, t2["RayFront"], 0.3)
-    transform.translate.y=transform.translate.y+(transform.scale.y+0.01)
+    local rayOrigin = transform
+    rayOrigin.translate.y = rayOrigin.translate.y - (rayOrigin.scale.y + 0.01)
+
+    local e = Raycast(rayOrigin.translate, downVector, 0.3)
+
     if e ~= 0 then
         local m = GetComponent(this, "Material")
-        m.albedo.x =1
+        m.albedo.x = 1
         m.albedo.y = 0
         m.albedo.z = 0
-        if input:GetKeyUp(AdHoc.Key.space) then
-            HitObjectCnt=HitObjectCnt+1
-            material=GetComponent(e,"Material")
-            material.albedo.x=0
-            material.albedo.y=0
-            material.albedo.z=1
+        if input:GetKeyDown(AdHoc.Key.space) then
+            hitObjectCnt = hitObjectCnt + 1
+
             local transforms = GetComponent(e, "Transform")
             transforms.scale.x = 0.05
             transforms.scale.y = 0.05
             transforms.scale.z = 0.05
-            local s = GetComponent(e, "Script")
-            s:Call("Particle")
-            --LogMessage(s:Get("Type"))
-            local ObjectType=s:Get("Type")
-            local meshes = GetComponent(e, "Mesh")
-            meshes:Load(fbxname[ObjectType])
 
-            AdHoc.Global.CameraShake=true
-            local tempRigidbody = GetComponent(e, "RigidBody")
-            tempRigidbody:SetVelocity(0,0,0)
-            tempRigidbody:SetTranslation(transforms.translate.x, 0.1, transforms.translate.z )
-            --tempRigidbody:SetScale(transforms.scale.x,transforms.scale.y,transforms.scale.z)
-            tempRigidbody:UpdateGeometry()
-           
+            local s      = GetComponent(e, "Script")
+            local meshes = GetComponent(e, "Mesh")
+            meshes:Load(meshName[s:Get("type")])
+            s:Call("IsSet", true)
+            s:Call("Particle")
+
+            AdHoc.Global.CameraShake = true
+
+            material = GetComponent(e, "Material")
+            material.albedo.x = math.random(0, 1)
+            material.albedo.y = math.random(0, 1)
+            material.albedo.z = math.random(0, 1)
+
+            -- TODO: change to mesh collider?
+            local r = GetComponent(e, "RigidBody")
+            r:SetVelocity(0, 0, 0)
+            r:SetTranslation(transforms.translate.x, 0.1, transforms.translate.z)
+            r:UpdateGeometry()
        end
     else
         local m = GetComponent(this, "Material")
         m.albedo.x = 1
-        m.albedo.y =1
-        m.albedo.z =1
+        m.albedo.y = 1
+        m.albedo.z = 1
     end
 end
 
 function RayHitRotation()
     local transform = GetComponent(this, "Transform")
-    transform.translate.y=transform.translate.y-(transform.scale.y+0.01)
-    local e = Raycast(transform.translate, t2["RayFront"], 0.7)
-    transform.translate.y=transform.translate.y+(transform.scale.y+0.01)
+    local rayOrigin = transform
+    rayOrigin.translate.y = rayOrigin.translate.y - (rayOrigin.scale.y + 0.01)
+    local e = Raycast(rayOrigin.translate, downVector, 0.7)
+
     if e ~= 0 then
         local m = GetComponent(this, "Material")
-        m.albedo.x =1
+        m.albedo.x = 1
         m.albedo.y = 0
         m.albedo.z = 0
-        -- material=GetComponent(e,"Material")
-        -- material.albedo.x=1
-        -- material.albedo.y=0
-        -- material.albedo.z=0
         local transform3 = GetComponent(e, "Transform")
        
-        Yangle= transform3.rotation.y
+        angleY = transform3.rotation.y
         if input:GetKeyUp(AdHoc.Key.j) then
-            Yangle=Yangle+0.1
+            angleY = angleY + 0.1
         elseif input:GetKeyUp(AdHoc.Key.l) then
-            Yangle=Yangle-0.1
+            angleY = angleY - 0.1
         end
 
         local tempRigidbody = GetComponent(e, "RigidBody")
-        tempRigidbody:SetRotation(0,Yangle,0)
+        tempRigidbody:SetRotation(0, angleY, 0)
         tempRigidbody:UpdateGeometry()
     else
         local m = GetComponent(this, "Material")
         m.albedo.x = 1
-        m.albedo.y =1
-        m.albedo.z =1
+        m.albedo.y = 1
+        m.albedo.z = 1
     end
 end
 
 function Start()
-    t2["RayFront"].x=0
-    t2["RayFront"].y=-1
-    t2["RayFront"].z=0
+    local t = GetComponent(this, "Transform")
+    t.translate.y = 1
 end
 
 function Update()
-    if FPSflg==false then
+    if FPSflg == false then
         MoveCrossHair()
-        if HitObjectCnt>MaxHitObject then
-            RotationFlg=true
+        if hitObjectCnt > maxHitObject then
+            rotationFlg = true
          end
-        if RotationFlg==false then
+        if rotationFlg == false then
             RayHit()
         else
             RayHitRotation()
         end
-        if input:GetKeyUp(AdHoc.Key.enter) and RotationFlg== true then
-            FPSflg=true
-            AdHoc.Global.FPSflg=FPSflg
+        if input:GetKeyUp(AdHoc.Key.enter) and rotationFlg == true then
+            FPSflg = true
         end
     else
-        DestroyEntity(this)
+        --DestroyEntity(this)
+        local m = GetComponent(this, "Mesh")
+        m.toDraw = false;
     end
-    
-    
-    AdHoc.Global.RotationFlg=RotationFlg
 end
