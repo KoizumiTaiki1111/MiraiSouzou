@@ -18,10 +18,11 @@ local objScript = [[
     type       = 10
     hit        = false
     hitAreaFlg = false
-    Particleflg=false
+    particleflg=false
+    local audio
 
     --パーティクル用変数
-    Particleentities={}
+    local particleentities={}
     local rigidbodies = {}
     local nextId = 0
     local transform
@@ -74,6 +75,8 @@ local objScript = [[
 
     function Start()
        type = math.random(1, 4)
+       audio = Audio:new()
+       audio:Create("attack.wav")
     end
 
     function Update()
@@ -98,37 +101,40 @@ local objScript = [[
     end
 
     function FixedUpdate()
-        if Particleflg==true then
+        if particleflg == true then
             destroyparticletime = destroyparticletime+1
             if destroyparticletime > 3 then
                  destroyparticletime=0
                  for i = 0, nextId - 1 do  
-                    DestroyEntity(Particleentities[i])
+                    DestroyEntity(particleentities[i])
                  end
-                Particleflg=false
+                particleflg=false
             end
         end
     end
 
     function Particle()
-        Particleflg=true
+
+        audio:Play()
+
+        particleflg=true
         local count = 50
         transform = GetComponent(this, "Transform")
         for i = 0, count do
-            Particleentities[nextId] = CreateEntity()
-            local m = GetComponent(Particleentities[nextId], "Material")
+            particleentities[nextId] = CreateEntity()
+            local m = GetComponent(particleentities[nextId], "Material")
             m.albedo.x = 1
             m.albedo.y = 1
             m.albedo.z = 0
 
-            local t = GetComponent(Particleentities[nextId], "Transform")
+            local t = GetComponent(particleentities[nextId], "Transform")
             t.scale.x = 0.01
             t.scale.y = 0.01
             t.scale.z = 0.01
 
-            AddComponent(Particleentities[nextId], "RigidBody", "Box", "Dynamic");
+            AddComponent(particleentities[nextId], "RigidBody", "Box", "Dynamic");
 
-            rigidbodies[nextId] = GetComponent(Particleentities[nextId], "RigidBody")
+            rigidbodies[nextId] = GetComponent(particleentities[nextId], "RigidBody")
 
             rigidbodies[nextId]:SetRestitution(0.1)
             rigidbodies[nextId]:SetPosition(transform.translate.x + math.random(0, 0), 
