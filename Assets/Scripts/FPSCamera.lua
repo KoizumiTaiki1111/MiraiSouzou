@@ -113,5 +113,26 @@ function Update()
         if input:GetKeyUp(AdHoc.Key.space) then 
             LoadScene(nextScene)
         end
+    else
+        if AdHoc.Global.CameraShake==true then
+            camera.eyePosition.x = 0+math.sin(shaketime)/5
+            camera.eyePosition.y =1.5+math.sin(shaketime)/5
+            camera.eyePosition.z = -2.5
+        else
+            camera.eyePosition.x = 0
+            camera.eyePosition.y =1.5
+            camera.eyePosition.z = -2.5
+        end
+    end
+
+end
+
+function FixedUpdate()
+    if AdHoc.Global.CameraShake==true then
+        shaketime=shaketime+1
+        if shaketime>3 then
+            shaketime=0
+            AdHoc.Global.CameraShake=false
+        end
     end
 end

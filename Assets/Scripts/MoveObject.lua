@@ -13,12 +13,11 @@ local Position_x=-0.9
 
 local fbxname={}
 fbxname[1]="bed.obj"
-fbxname[2]="dai.obj"
-fbxname[3]="sofa_double.obj"
-fbxname[4]="table.obj"
+fbxname[2]="sofa_double.obj"
+fbxname[3]="table.obj"
+fbxname[4]="dai.obj"
 
 local reel = {}
-
 
 local ObjectType = [[
     local this = GetThis()
@@ -26,8 +25,17 @@ local ObjectType = [[
     Type = 10
     Hit=false
     HitAreaFlg=false
+    Particleflg=false
     local t2={}
     t2["RayFront2"]=Vector3D:new()
+
+    --パーティクル用変数
+    Particleentities={}
+    local rigidbodies = {}
+    local nextId = 0
+    local transform
+    local destroyparticletime = 0
+
     function GetValue(x)
         return value * x
     end
@@ -35,6 +43,10 @@ local ObjectType = [[
     function SetHit()
        Hit=true
     end
+
+    function SetParticle()
+        Particleflg=true
+     end
 
     function RotationHit()
         -- local transforms = GetComponent(this, "Transform")
@@ -101,6 +113,22 @@ local ObjectType = [[
         t2["RayFront2"].x=0
         t2["RayFront2"].y=1
         t2["RayFront2"].z=0
+
+        local transforms = GetComponent(this, "Transform")
+        if Type==1 or Type==2 then
+            transforms.scale.x = 0.125
+            transforms.scale.y = 0.125
+            transforms.scale.z = 0.125
+        elseif Type==3 then
+            transforms.scale.x = 0.1
+            transforms.scale.y = 0.1
+            transforms.scale.z = 0.1
+        else
+            transforms.scale.x = 0.075
+            transforms.scale.y = 0.075
+            transforms.scale.z = 0.075
+        end
+
     end
 
     function Update()
@@ -109,9 +137,7 @@ local ObjectType = [[
         else
             RotationHit()
         end
-       
       
-
         local transforms = GetComponent(this, "Transform")
         local tempRigidbody = GetComponent(this, "RigidBody")
         if transforms.translate.z>1.0 then 
@@ -126,29 +152,55 @@ local ObjectType = [[
         end
     end
 
+    function FixedUpdate()
+        if Particleflg==true then
+            destroyparticletime = destroyparticletime+1
+            if destroyparticletime > 3 then
+                 destroyparticletime=0
+                 for i = 0, nextId - 1 do  
+                    DestroyEntity(Particleentities[i])
+                 end
+                Particleflg=false
+            end
+        end
+    end
+
     function TypeObject(_x)
         Type=_x
     end
 
-    -- function OnTriggerEnter(rhs)
-    --     material=GetComponent(this,"Material")
-    --     material.albedo.x=0
-    --     material.albedo.y=0
-    --     material.albedo.z=1
-    -- end
 
-    -- function OnTriggerExit(rhs)
-    --     if AdHoc.Global.RotationFlg==false then
-    --         material=GetComponent(this,"Material")
-    --         material.albedo.x=1
-    --         material.albedo.y=1
-    --         material.albedo.z=1
-    --     end
-    -- end
+    function Particle()
+        Particleflg=true
+        -- local audio = Audio:new()
+        -- audio:Create("attack.wav", 0)
+        -- audio:Play()
+        local count = 50
+        transform = GetComponent(this, "Transform")
+        for i = 0, count do
+            Particleentities[nextId] = CreateEntity()
+            local m = GetComponent(Particleentities[nextId], "Material")
+            m.albedo.x = 5
+            m.albedo.y = 5
+            m.albedo.z = 5
 
-    
+            local t = GetComponent(Particleentities[nextId], "Transform")
+            t.scale.x = 0.01
+            t.scale.y = 0.01
+            t.scale.z = 0.01
 
-    
+            AddComponent(Particleentities[nextId], "RigidBody", "Box", "Dynamic");
+
+            rigidbodies[nextId] = GetComponent(Particleentities[nextId], "RigidBody")
+
+            rigidbodies[nextId]:SetRestitution(0.1)
+            rigidbodies[nextId]:SetPosition(transform.translate.x + math.random(0, 0), 
+            transform.translate.y + transform.scale.y, 
+            transform.translate.z + math.random(0, 0))
+            rigidbodies[nextId]:AddForce(math.random(-10, 10), 10, math.random(-10, 10))
+            nextId = nextId + 1
+        end
+    end
 ]]
 
 function SetTypeObject()

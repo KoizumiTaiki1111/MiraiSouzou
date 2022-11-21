@@ -12,15 +12,9 @@ local FPSflg=false
 
 local fbxname={}
 fbxname[1]="bed.obj"
-fbxname[2]="dai.obj"
-fbxname[3]="sofa_double.obj"
-fbxname[4]="table.obj"
-
--- local fbxname={}
--- fbxname[1]="cube.obj"
--- fbxname[2]="cube.obj"
--- fbxname[3]="cube.obj"
--- fbxname[4]="cube.obj"
+fbxname[2]="sofa_double.obj"
+fbxname[3]="table.obj"
+fbxname[4]="dai.obj"
 
 function MoveCrossHair()
     local transform = GetComponent(this, "Transform")
@@ -65,7 +59,7 @@ function RayHit()
         m.albedo.x =1
         m.albedo.y = 0
         m.albedo.z = 0
-        if input:GetKey(AdHoc.Key.space) then
+        if input:GetKeyUp(AdHoc.Key.space) then
             HitObjectCnt=HitObjectCnt+1
             material=GetComponent(e,"Material")
             material.albedo.x=0
@@ -76,12 +70,13 @@ function RayHit()
             transforms.scale.y = 0.05
             transforms.scale.z = 0.05
             local s = GetComponent(e, "Script")
+            s:Call("Particle")
             --LogMessage(s:Get("Type"))
             local ObjectType=s:Get("Type")
             local meshes = GetComponent(e, "Mesh")
             meshes:Load(fbxname[ObjectType])
 
-            
+            AdHoc.Global.CameraShake=true
             local tempRigidbody = GetComponent(e, "RigidBody")
             tempRigidbody:SetVelocity(0,0,0)
             tempRigidbody:SetTranslation(transforms.translate.x, 0.1, transforms.translate.z )
