@@ -8,22 +8,25 @@ local nextId                = 0
 local time                  = 0
 local positionX             = -0.9
 
-local scaleSizes = {}
-scaleSizes[1]    = 0.075
-scaleSizes[2]    = 0.1
-scaleSizes[3]    = 0.125
-
 local objScript = [[
     local this = GetThis()
     type       = 10
     hit        = false
     local audio
-    
+    local idletime = 0
+    local randomScale  = math.random(1, 3)
+    local scaleSizes = {}
+    scaleSizes[1]    = 0.075
+    scaleSizes[2]    = 0.1
+    scaleSizes[3]    = 0.125
+    local once = false
+
     --flg
     hitAreaFlg = false
     particleflg=false
     moveflg=true
     moveingtime=0
+    idleflg = true
 
     --gorst
     local gorstentities = {}
@@ -42,14 +45,7 @@ local objScript = [[
         isSet = x
     end
 
-    function DestoryGorst()
-        for i = 0, gorstnextid-1 do
-            gorstnextid=0
-            LogMessage("aaa")
-            DestroyEntity(gorstentities[i])
-        end
-    end
-
+   
     function Hit()
         moveflg=false
         DestoryGorst()
@@ -95,6 +91,7 @@ local objScript = [[
     end
 
     function Start()
+       randomScale  = math.random(1, 3)
        type = math.random(1, 4)
        audio = Audio:new()
        audio:Create("attack.wav")
@@ -102,36 +99,43 @@ local objScript = [[
     end
 
     function Update()
-        if moveflg==true then
-            Moveing()
-        end
-        GorstFollow()
+        if idleflg == true then
+            StartAction()
+        else
+            if once == false then
+                local r = GetComponent(this, "RigidBody")
+                r:SetVelocity(0, 0, 0.2)
+                once=true
+            end
+            if moveflg==true then
+                Moveing()
+            end
+            GorstFollow()
 
-        local s = GetComponent(AdHoc.Global.g_NailId, "Script")
-        local rotationFlg = s:Get("rotationFlg")
-        if rotationFlg == false then
-            HitArea()
-        end
-
-        local transforms = GetComponent(this, "Transform")
-        local r          = GetComponent(this, "RigidBody")
-        if transforms.translate.z > 1.0 then
-            r:SetTranslation(transforms.translate.x, 0.5, -1.0 )
-            r:UpdateGeometry()
-        end
-
-        if rotationFlg == true then
-            if transforms.translate.y >= 0.5 then
-                DestroyEntity(this)
+            local s = GetComponent(AdHoc.Global.g_NailId, "Script")
+            local rotationFlg = s:Get("rotationFlg")
+            if rotationFlg == false then
+                HitArea()
+            else
+                local transforms = GetComponent(this, "Transform")
+                if transforms.translate.y >= 0.3 then
+                    DestroyEntity(this)
+                    DestoryGorst()
+                end
             end
         end
     end
 
     function FixedUpdate()
         moveingtime=moveingtime+0.1
+        if idletime>2 then
+            idleflg=false
+        else
+            idletime=idletime+0.1
+        end
         if particleflg == true then
             destroyparticletime = destroyparticletime+1
-            if destroyparticletime > 3 then
+            if destroyparticletime > 2 then
                  destroyparticletime=0
                  for i = 0, nextId - 1 do  
                     DestroyEntity(particleentities[i])
@@ -141,29 +145,42 @@ local objScript = [[
         end
     end
 
-    function GorstSpawn()
-        for i = 0, 1 do
-            gorstentities[gorstnextid] = CreateEntity()
-
-            local transforms = GetComponent(this, "Transform")
-            local gorsttransforms = GetComponent(gorstentities[gorstnextid], "Transform")
-
+    function StartAction()
+        local transforms = GetComponent(this, "Transform")
+        local r = GetComponent(this, "RigidBody")
+        transforms.scale.x     =  scaleSizes[randomScale]*(idletime/2)
+        transforms.scale.y     =  scaleSizes[randomScale]*(idletime/2)
+        transforms.scale.z     =  scaleSizes[randomScale]*(idletime/2)
+        r.scale.x= transforms.scale.x
+        r.scale.y= transforms.scale.y
+        r.scale.z= transforms.scale.z
+        for i = 0, gorstnextid-1 do
+            local gorsttransforms = GetComponent(gorstentities[i], "Transform")
             gorsttransforms.scale.x     = transforms.scale.x * 0.7
             gorsttransforms.scale.y     = transforms.scale.y * 0.7
             gorsttransforms.scale.z     = transforms.scale.z * 0.7
             gorsttransforms.translate.x = transforms.translate.x
             gorsttransforms.translate.y = transforms.translate.y
-            gorsttransforms.translate.z = (transforms.translate.z-transforms.scale.z * 2)+(transforms.scale.z * 4*i)
-            
-            local meshes = GetComponent(gorstentities[gorstnextid], "Mesh")
-            meshes:Load("ghost_simple.fbx")
-
+            gorsttransforms.translate.z = (transforms.translate.z- transforms.scale.z * 2.5)+( transforms.scale.z * 5*i)
+            gorsttransforms.rotation.x  =  math.rad(-90)
+            gorsttransforms.rotation.y  = math.rad((180/(idletime/2)))
+            gorsttransforms.rotation.z  =0
             if i==1 then
-                gorsttransforms.rotation.x = 0
-                gorsttransforms.rotation.y = math.rad(180)
-                gorsttransforms.rotation.z = 0
+                gorsttransforms.rotation.x = math.rad(-90)
+                gorsttransforms.rotation.y = math.rad(180)+math.rad((180/(idletime/2)))
+                gorsttransforms.rotation.z =0
             end
            
+        end
+       r:UpdateGeometry()
+    end
+
+    function GorstSpawn()
+        for i = 0, 1 do
+            gorstentities[gorstnextid] = CreateEntity()
+            local gorsttransforms = GetComponent(gorstentities[gorstnextid], "Transform")
+            local meshes = GetComponent(gorstentities[gorstnextid], "Mesh")
+            meshes:Load("ghost_simple.fbx")
             gorstnextid = gorstnextid + 1
         end
     end
@@ -185,8 +202,18 @@ local objScript = [[
         transforms.translate.z = transforms.translate.z
         local r = GetComponent(this, "RigidBody")
         r:SetTranslation( transforms.translate.x, transforms.translate.y,  transforms.translate.z )
+        
+        if transforms.translate.z > 1.0 then
+            r:SetTranslation(transforms.translate.x,transforms.translate.y, -1.0 )
+        end
     end
 
+    function DestoryGorst()
+        for i = 0, gorstnextid-1 do
+            gorstnextid=0
+            DestroyEntity(gorstentities[i])
+        end
+    end
 
     function Particle()
 
@@ -226,9 +253,9 @@ function SpawnObject()
     local transforms = GetComponent(entities[nextId], "Transform")
 
     local randomScale  = math.random(1, 3)
-    transforms.scale.x = scaleSizes[randomScale]
-    transforms.scale.y = scaleSizes[randomScale]
-    transforms.scale.z = scaleSizes[randomScale]
+    transforms.scale.x =0
+    transforms.scale.y =0
+    transforms.scale.z = 0
 
     AddComponent(entities[nextId], "RigidBody", "Box", "Dynamic")
     AddComponent(entities[nextId], "Script", objScript)
@@ -236,7 +263,6 @@ function SpawnObject()
     r:SetTranslation(positionX, 0.5, -1.0 )
     positionX = positionX + 0.2
     
-    r:SetVelocity(0, 0, 0.2)
     r:SetHasGravity(false)
     r:SetTrigger(true)
     r:UpdateGeometry()
