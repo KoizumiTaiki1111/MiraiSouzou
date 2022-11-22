@@ -17,10 +17,18 @@ local objScript = [[
     local this = GetThis()
     type       = 10
     hit        = false
+    local audio
+    
+    --flg
     hitAreaFlg = false
     particleflg=false
-    local audio
+    moveflg=true
+    moveingtime=0
 
+    --gorst
+    local gorstentities = {}
+    local gorstnextid = 0
+    
     --パーティクル用変数
     local particleentities={}
     local rigidbodies = {}
@@ -32,6 +40,19 @@ local objScript = [[
 
     function IsSet(x)
         isSet = x
+    end
+
+    function DestoryGorst()
+        for i = 0, gorstnextid-1 do
+            gorstnextid=0
+            LogMessage("aaa")
+            DestroyEntity(gorstentities[i])
+        end
+    end
+
+    function Hit()
+        moveflg=false
+        DestoryGorst()
     end
 
     -- FIXME
@@ -77,9 +98,15 @@ local objScript = [[
        type = math.random(1, 4)
        audio = Audio:new()
        audio:Create("attack.wav")
+       GorstSpawn()
     end
 
     function Update()
+        if moveflg==true then
+            Moveing()
+        end
+        GorstFollow()
+
         local s = GetComponent(AdHoc.Global.g_NailId, "Script")
         local rotationFlg = s:Get("rotationFlg")
         if rotationFlg == false then
@@ -101,6 +128,7 @@ local objScript = [[
     end
 
     function FixedUpdate()
+        moveingtime=moveingtime+0.1
         if particleflg == true then
             destroyparticletime = destroyparticletime+1
             if destroyparticletime > 3 then
@@ -112,6 +140,53 @@ local objScript = [[
             end
         end
     end
+
+    function GorstSpawn()
+        for i = 0, 1 do
+            gorstentities[gorstnextid] = CreateEntity()
+
+            local transforms = GetComponent(this, "Transform")
+            local gorsttransforms = GetComponent(gorstentities[gorstnextid], "Transform")
+
+            gorsttransforms.scale.x     = transforms.scale.x * 0.7
+            gorsttransforms.scale.y     = transforms.scale.y * 0.7
+            gorsttransforms.scale.z     = transforms.scale.z * 0.7
+            gorsttransforms.translate.x = transforms.translate.x
+            gorsttransforms.translate.y = transforms.translate.y
+            gorsttransforms.translate.z = (transforms.translate.z-transforms.scale.z * 2)+(transforms.scale.z * 4*i)
+            
+            local meshes = GetComponent(gorstentities[gorstnextid], "Mesh")
+            meshes:Load("ghost_simple.fbx")
+
+            if i==1 then
+                gorsttransforms.rotation.x = 0
+                gorsttransforms.rotation.y = math.rad(180)
+                gorsttransforms.rotation.z = 0
+            end
+           
+            gorstnextid = gorstnextid + 1
+        end
+    end
+
+    function GorstFollow()
+        for i = 0, gorstnextid-1 do
+            local transforms = GetComponent(this, "Transform")
+            local gorsttransforms = GetComponent(gorstentities[i], "Transform")
+            gorsttransforms.translate.x = transforms.translate.x
+            gorsttransforms.translate.y = transforms.translate.y
+            gorsttransforms.translate.z = (transforms.translate.z-transforms.scale.z * 2.5)+(transforms.scale.z * 5*i)
+        end
+    end
+
+    function Moveing()
+        local transforms = GetComponent(this, "Transform")
+        transforms.translate.x = transforms.translate.x
+        transforms.translate.y = transforms.translate.y+(math.sin(moveingtime)/200)
+        transforms.translate.z = transforms.translate.z
+        local r = GetComponent(this, "RigidBody")
+        r:SetTranslation( transforms.translate.x, transforms.translate.y,  transforms.translate.z )
+    end
+
 
     function Particle()
 

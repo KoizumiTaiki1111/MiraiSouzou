@@ -1,12 +1,40 @@
 Scene: S_MainGame
 Entities:
-  - Entity: 21474836480
+  - Entity: 17179869184
     Tag:
-      tag: Hanmer
+      tag: Runtime Camera
+    Script:
+      name: FPSCamera.lua
+    Camera3D:
+      eye position: [0, 3, -0.5]
+      focus position: [0, 0.5, 0]
+      up vector: [0, 1, 0]
+      field of view: 45
+      aspect ratio: 1.77777779
+      nearZ: 1
+      farZ: 100
+      is runtime camera: true
+      is scene camera: false
+  - Entity: 12884901888
+    Tag:
+      tag: Main Camera
+    Camera3D:
+      eye position: [0, 3.20000005, -0.00999999978]
+      focus position: [0, 0, 0]
+      up vector: [0, 1, 0]
+      field of view: 45
+      aspect ratio: 1.77777779
+      nearZ: 1
+      farZ: 100
+      is runtime camera: false
+      is scene camera: true
+  - Entity: 8589934592
+    Tag:
+      tag: Stage
     Transform:
-      translate: [0.225696713, -0.260030389, 0]
+      translate: [0, 0, 0]
       rotation: [0, 0, 0]
-      scale: [0.200000003, 0.100000001, 0.200000003]
+      scale: [1, 0.100000001, 1]
     Mesh:
       name: cube.obj
       draw: true
@@ -15,7 +43,9 @@ Entities:
       metallicness: 0
       transparency: 1
       albedo: [1, 1, 1]
-  - Entity: 17179869184
+    Script:
+      name: MoveObject.lua
+  - Entity: 4294967296
     Tag:
       tag: Nail
     Transform:
@@ -43,52 +73,7 @@ Entities:
       collider type: 0
       collider shape: 0
       body type: 1
-      entity: 17179869184
+      entity: 4294967296
       scale: [0.0500000007, 0.200000003, 0.0500000007]
       radius: 1
       half height: 0.5
-  - Entity: 12884901888
-    Tag:
-      tag: Stage
-    Transform:
-      translate: [0, 0, 0]
-      rotation: [0, 0, 0]
-      scale: [1, 0.100000001, 1]
-    Mesh:
-      name: cube.obj
-      draw: true
-    Material:
-      roughness: 0.600000024
-      metallicness: 0
-      transparency: 1
-      albedo: [1, 1, 1]
-    Script:
-      name: MoveObject.lua
-  - Entity: 8589934592
-    Tag:
-      tag: Main Camera
-    Camera3D:
-      eye position: [0, 3.20000005, -0.00999999978]
-      focus position: [0, 0, 0]
-      up vector: [0, 1, 0]
-      field of view: 45
-      aspect ratio: 1.77777779
-      nearZ: 1
-      farZ: 100
-      is runtime camera: false
-      is scene camera: true
-  - Entity: 4294967296
-    Tag:
-      tag: Runtime Camera
-    Script:
-      name: FPSCamera.lua
-    Camera3D:
-      eye position: [0, 1.5, -2.5]
-      focus position: [0, 0.5, 0]
-      up vector: [0, 1, 0]
-      field of view: 45
-      aspect ratio: 1.77777779
-      nearZ: 1
-      farZ: 100
-      is runtime camera: true
-      is scene camera: false

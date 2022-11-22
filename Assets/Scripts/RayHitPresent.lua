@@ -79,6 +79,7 @@ function RayHit()
             local meshes = GetComponent(e, "Mesh")
             meshes:Load(meshName[s:Get("type")])
             s:Call("IsSet", true)
+            s:Call("Hit")
             s:Call("Particle")
 
             AdHoc.Global.CameraShake = true

@@ -112,13 +112,13 @@ function Update()
         end
     else
         if AdHoc.Global.CameraShake==true then
-            camera.eyePosition.x = 0 + math.sin(shaketime) / 5
-            camera.eyePosition.y = 1.5 + math.sin(shaketime) / 5
-            camera.eyePosition.z = -2.5
+            camera.eyePosition.x = 0 + math.sin(shaketime) / 10
+            camera.eyePosition.y = 3 + math.sin(shaketime) / 10
+            camera.eyePosition.z = -0.5
         else
             camera.eyePosition.x = 0
-            camera.eyePosition.y = 1.5
-            camera.eyePosition.z = -2.5
+            camera.eyePosition.y = 3
+            camera.eyePosition.z = -0.5
         end
     end
 end
