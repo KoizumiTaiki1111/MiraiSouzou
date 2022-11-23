@@ -20,6 +20,20 @@ local objScript = [[
     scaleSizes[2]    = 0.1
     scaleSizes[3]    = 0.125
     local once = false
+    local speed = 0.3
+    local endline = 1.5
+
+    --position
+    local t2={}
+    t2["CornerPosition"]=Vector3D:new()
+    t2["CornerPosition2"]=Vector3D:new()
+    t2["linetransform"]=Vector3D:new()
+    t2["Movetransform"]=Vector3D:new()
+    t2["force"]=Vector3D:new()
+    t2["Vector"]=Vector3D:new()
+    t2["Vector2"]=Vector3D:new()
+    t2["angleforce"]=Vector3D:new()
+    local range=1
 
     --flg
     hitAreaFlg = false
@@ -45,10 +59,37 @@ local objScript = [[
         isSet = x
     end
 
-   
     function Hit()
         moveflg=false
         DestoryGorst()
+    end
+
+    --PositionFunction
+    function SecondPointAngle(_x1,_y1,_x2,_y2) 
+        local angle=(_x1*_x2+_y1*_y2)/(math.sqrt((_x1*_x1+_y1*_y1))*math.sqrt((_x2*_x2+_y2*_y2)))
+        angle=math.acos(angle)
+        angle=angle/math.pi*180
+        return angle
+    end
+    
+    function AngleRotationX(_x1,_z1,_x2,_z2,_angle)
+        local X=(_x1-_x2)*math.cos(_angle)-(_z1-_z2)*math.sin(_angle)
+        return X
+    end
+    
+    function AngleRotationZ(_x1,_z1,_x2,_z2,_angle)
+        local Z=(_x1-_x2)*math.sin(_angle)+(_z1-_z2)*math.cos(_angle)
+        return Z
+    end
+    
+    function NormalizeX(_x1,_z1,_x2,_z2)
+        local Power=math.sqrt(((_x1-_x2)*(_x1-_x2))+((_z1-_z2)*(_z1-_z2)))
+        return (_x1-_x2)/Power
+    end
+    
+    function NormalizeZ(_x1,_z1,_x2,_z2)
+        local Power=math.sqrt(((_x1-_x2)*(_x1-_x2))+((_z1-_z2)*(_z1-_z2)))
+        return (_z1-_z2)/Power
     end
 
     -- FIXME
@@ -96,6 +137,7 @@ local objScript = [[
        audio = Audio:new()
        audio:Create("attack.wav")
        GorstSpawn()
+       SetPosition()
     end
 
     function Update()
@@ -104,7 +146,7 @@ local objScript = [[
         else
             if once == false then
                 local r = GetComponent(this, "RigidBody")
-                r:SetVelocity(0, 0, 0.2)
+                r:SetVelocity(t2["force"].x*speed, 0, t2["force"].z*speed)
                 once=true
             end
             if moveflg==true then
@@ -175,6 +217,132 @@ local objScript = [[
        r:UpdateGeometry()
     end
 
+    function SetPosition()
+        --オブジェクトの出現場所を乱数で決定
+        local PositionRandom=math.random(0,3)
+        local PositionSpace=math.random(0,range*2)
+    
+        --数字によって出現場所を決定
+        if PositionRandom==0 then
+            t2["linetransform"].x=-range
+            t2["linetransform"].y=3
+            t2["linetransform"].z=-range+PositionSpace
+    
+           if PositionSpace<=range then
+                t2["CornerPosition"].x=-range
+                t2["CornerPosition"].z=range
+                t2["CornerPosition2"].x=range
+                t2["CornerPosition2"].z=-range
+                t2["angleforce"].x=-1
+                t2["angleforce"].z=1
+            else
+                t2["CornerPosition"].x=-range
+                t2["CornerPosition"].z=-range
+                t2["CornerPosition2"].x=range
+                t2["CornerPosition2"].z=range
+                t2["angleforce"].x=1
+                t2["angleforce"].z=1
+            end
+    
+        
+        elseif PositionRandom==1 then
+           t2["linetransform"].x=-range+PositionSpace
+           t2["linetransform"].y=3
+           t2["linetransform"].z=-range
+    
+           if PositionSpace<=range then
+                t2["CornerPosition"].x=range
+                t2["CornerPosition"].z=-range
+                t2["CornerPosition2"].x=-range
+                t2["CornerPosition2"].z=range
+                t2["angleforce"].x=1
+                t2["angleforce"].z=1
+            else
+                t2["CornerPosition"].x=-range
+                t2["CornerPosition"].z=-range
+                t2["CornerPosition2"].x=range
+                t2["CornerPosition2"].z=range
+                t2["angleforce"].x=1
+                t2["angleforce"].z=-1
+            end
+    
+        elseif PositionRandom==2 then
+            t2["linetransform"].x=range
+            t2["linetransform"].y=3
+            t2["linetransform"].z=-range+PositionSpace
+    
+            if PositionSpace<=range then
+                t2["CornerPosition"].x=range
+                t2["CornerPosition"].z=range
+                t2["CornerPosition2"].x=-range
+                t2["CornerPosition2"].z=-range
+                t2["angleforce"].x=1
+                t2["angleforce"].z=1
+            else
+                t2["CornerPosition"].x=range
+                t2["CornerPosition"].z=-range
+                t2["CornerPosition2"].x=-range
+                t2["CornerPosition2"].z=range
+                t2["angleforce"].x=-1
+                t2["angleforce"].z=1
+            end
+    
+        elseif PositionRandom==3 then
+           t2["linetransform"].x=-range+PositionSpace
+           t2["linetransform"].y=3
+           t2["linetransform"].z=range
+    
+           if PositionSpace<=range then
+            t2["CornerPosition"].x=range
+            t2["CornerPosition"].z=range
+            t2["CornerPosition2"].x=-range
+            t2["CornerPosition2"].z=-range
+            t2["angleforce"].x=1
+            t2["angleforce"].z=-1
+        else
+            t2["CornerPosition"].x=-range
+            t2["CornerPosition"].z=range
+            t2["CornerPosition2"].x=range
+            t2["CornerPosition2"].z=-range
+            t2["angleforce"].x=1
+            t2["angleforce"].z=1
+        end
+        end
+    
+        --端の座標と今いる座標とのベクトルの向きを出す
+        t2["Vector"].x=t2["CornerPosition"].x-t2["linetransform"].x
+        t2["Vector"].z=t2["CornerPosition"].z-t2["linetransform"].z
+        t2["Vector2"].x=t2["CornerPosition2"].x-t2["linetransform"].x
+        t2["Vector2"].z=t2["CornerPosition2"].z-t2["linetransform"].z
+    
+        --2つのベクトルから角度を求める
+        local radian=SecondPointAngle( t2["Vector"].x, t2["Vector"].z, t2["Vector2"].x, t2["Vector2"].z)
+    
+        --度数方をラジアンに反感
+        radian=math.floor(radian)
+        --LogMessage( radian)
+        radian=math.random(0,radian)
+        local a=radian/180*math.pi
+        --LogMessage(a)
+    
+        --進んでいく方向の点を求める
+        t2["Movetransform"].x=t2["angleforce"].x*AngleRotationX(t2["CornerPosition"].x,t2["CornerPosition"].z,t2["linetransform"].x,t2["linetransform"].z,a)
+        t2["Movetransform"].z=t2["angleforce"].z*AngleRotationZ(t2["CornerPosition"].x,t2["CornerPosition"].z,t2["linetransform"].x,t2["linetransform"].z,a)
+        t2["Movetransform"].x=t2["Movetransform"].x+t2["linetransform"].x
+        t2["Movetransform"].z=t2["Movetransform"].z+t2["linetransform"].z
+    
+        --今いる座標と行く方向の座標からベクトルを求めて正規化する
+        t2["force"].x=NormalizeX(t2["Movetransform"].x,t2["Movetransform"].z,t2["linetransform"].x,t2["linetransform"].z)
+        t2["force"].z=NormalizeZ(t2["Movetransform"].x,t2["Movetransform"].z,t2["linetransform"].x,t2["linetransform"].z)
+
+        local transforms = GetComponent(this, "Transform")
+        local Rigidbody = GetComponent(this, "RigidBody")
+        --Rigidbody:SetTranslation(t2["linetransform"].x,0.5,t2["linetransform"].z)
+        Rigidbody:SetTranslation(t2["linetransform"].x- t2["force"].x*speed,0.5,t2["linetransform"].z- t2["force"].z*speed)
+        Rigidbody:UpdateGeometry()
+
+    end
+
     function GorstSpawn()
         for i = 0, 1 do
             gorstentities[gorstnextid] = CreateEntity()
@@ -203,8 +371,8 @@ local objScript = [[
         local r = GetComponent(this, "RigidBody")
         r:SetTranslation( transforms.translate.x, transforms.translate.y,  transforms.translate.z )
         
-        if transforms.translate.z > 1.0 then
-            r:SetTranslation(transforms.translate.x,transforms.translate.y, -1.0 )
+        if transforms.translate.z > endline or transforms.translate.z < -endline or  transforms.translate.x > endline or transforms.translate.x < -endline then
+            r:SetTranslation(t2["linetransform"].x- t2["force"].x*speed,0.5,t2["linetransform"].z- t2["force"].z*speed)
         end
     end
 
@@ -253,15 +421,15 @@ function SpawnObject()
     local transforms = GetComponent(entities[nextId], "Transform")
 
     local randomScale  = math.random(1, 3)
-    transforms.scale.x =0
-    transforms.scale.y =0
+    transforms.scale.x = 0
+    transforms.scale.y = 0
     transforms.scale.z = 0
 
     AddComponent(entities[nextId], "RigidBody", "Box", "Dynamic")
     AddComponent(entities[nextId], "Script", objScript)
     local r = GetComponent(entities[nextId], "RigidBody")
-    r:SetTranslation(positionX, 0.5, -1.0 )
-    positionX = positionX + 0.2
+    -- r:SetTranslation(positionX, 0.5, -1.0 )
+    -- positionX = positionX + 0.2
     
     r:SetHasGravity(false)
     r:SetTrigger(true)

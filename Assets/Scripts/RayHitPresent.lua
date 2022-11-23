@@ -5,6 +5,9 @@ local input        = GetInput()
 local maxHitObject = 6
 local hitObjectCnt = 1
 local angleY       = 0
+local hitanimationflg = false
+local animationtime = 0
+local animationendtime = 7
 
 -- Global flags
 rotationFlg  = false
@@ -50,6 +53,10 @@ function MoveCrossHair()
         transform.translate.x = -1
     end
 
+    if hitanimationflg == false then
+        transform.translate.y=1
+    end
+
     -- Update rigidbody location
     local r = GetComponent(this, "RigidBody")
     r:SetTranslation(transform.translate.x, transform.translate.y, transform.translate.z )
@@ -68,6 +75,7 @@ function RayHit()
         m.albedo.y = 0
         m.albedo.z = 0
         if input:GetKeyDown(AdHoc.Key.space) then
+            hitanimationflg = true
             hitObjectCnt = hitObjectCnt + 1
 
             local transforms = GetComponent(e, "Transform")
@@ -141,6 +149,9 @@ end
 
 function Update()
     if FPSflg == false then
+        if hitanimationflg == true then
+            HitAnimation()
+        end
         MoveCrossHair()
         if hitObjectCnt > maxHitObject then
             rotationFlg = true
@@ -158,4 +169,24 @@ function Update()
         local m = GetComponent(this, "Mesh")
         m.toDraw = false;
     end
+end
+
+function FixedUpdate()
+    if hitanimationflg==true then
+        animationtime=animationtime+1
+        if animationtime>animationendtime then
+            hitanimationflg = false
+            animationtime = 0
+        end
+    end
+end
+
+function HitAnimation()
+    local transforms = GetComponent(this, "Transform")
+    transforms.translate.x = transforms.translate.x 
+    transforms.translate.y = transforms.translate.y-(1/animationendtime)
+    transforms.translate.z = transforms.translate.z 
+
+    local r = GetComponent(this, "RigidBody")
+    r:SetTranslation(transforms.translate.x, transforms.translate.y, transforms.translate.z )
 end
