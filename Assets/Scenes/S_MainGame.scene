@@ -14,7 +14,7 @@ Entities:
       roughness: 0.600000024
       metallicness: 0
       transparency: 1
-      albedo: [1, 1, 1]
+      albedo: [0.108108103, 0.108107023, 0.108107023]
     Script:
       name: RayHitPresent.lua
     RigidBody:
@@ -53,7 +53,7 @@ Entities:
     Tag:
       tag: Main Camera
     Camera3D:
-      eye position: [0, 3.20000005, -0.00999999978]
+      eye position: [0, 4, -0.00999999978]
       focus position: [0, 0, 0]
       up vector: [0, 1, 0]
       field of view: 45
@@ -68,7 +68,7 @@ Entities:
     Script:
       name: FPSCamera.lua
     Camera3D:
-      eye position: [0, 3, -0.5]
+      eye position: [0, 3, -0.300000012]
       focus position: [0, 0.5, 0]
       up vector: [0, 1, 0]
       field of view: 45
