@@ -22,6 +22,7 @@ local objScript = [[
     local once = false
     local speed = 0.3
     local endline = 1.5
+    
 
     --position
     local t2={}
@@ -33,6 +34,7 @@ local objScript = [[
     t2["Vector"]=Vector3D:new()
     t2["Vector2"]=Vector3D:new()
     t2["angleforce"]=Vector3D:new()
+    t2["angle"]=0
     local range=1
 
     --flg
@@ -41,10 +43,10 @@ local objScript = [[
     moveflg=true
     moveingtime=0
     idleflg = true
+    isdeletegorst = false
 
     --gorst
     local gorstentities = {}
-    local gorstnextid = 0
     
     --パーティクル用変数
     local particleentities={}
@@ -54,9 +56,14 @@ local objScript = [[
     local destroyparticletime = 0
 
     local isSet = false
+    local isGolden =false
 
     function IsSet(x)
         isSet = x
+    end
+
+    function IsGolden(x)
+        isGolden = x
     end
 
     function Hit()
@@ -114,11 +121,15 @@ local objScript = [[
             hitAreaFlg=false
         end
 
-        if transforms.translate.y<0.4 then
+        if transforms.translate.y<0.2 then
             hitAreaFlg=false
         end
-
-        if hitAreaFlg == true then
+        if isGolden==true then
+            material=GetComponent(this,"Material")
+            material.albedo.x=1
+            material.albedo.y=1
+            material.albedo.z=0
+        elseif hitAreaFlg == true then
             material=GetComponent(this,"Material")
             material.albedo.x=0
             material.albedo.y=0
@@ -149,10 +160,6 @@ local objScript = [[
                 r:SetVelocity(t2["force"].x*speed, 0, t2["force"].z*speed)
                 once=true
             end
-            if moveflg==true then
-                Moveing()
-            end
-            GorstFollow()
 
             local s = GetComponent(AdHoc.Global.g_NailId, "Script")
             local rotationFlg = s:Get("rotationFlg")
@@ -164,6 +171,14 @@ local objScript = [[
                     DestroyEntity(this)
                     DestoryGorst()
                 end
+            end
+           
+            if moveflg==true then
+                Moveing()
+            end
+            
+            if isdeletegorst==false then
+                GorstFollow()
             end
         end
     end
@@ -196,24 +211,19 @@ local objScript = [[
         r.scale.x= transforms.scale.x
         r.scale.y= transforms.scale.y
         r.scale.z= transforms.scale.z
-        for i = 0, gorstnextid-1 do
-            local gorsttransforms = GetComponent(gorstentities[i], "Transform")
+       
+            local gorsttransforms = GetComponent(gorstentities[0], "Transform")
             gorsttransforms.scale.x     = transforms.scale.x * 0.7
             gorsttransforms.scale.y     = transforms.scale.y * 0.7
             gorsttransforms.scale.z     = transforms.scale.z * 0.7
-            gorsttransforms.translate.x = transforms.translate.x
+            gorsttransforms.translate.x = transforms.translate.x-t2["force"].x*gorsttransforms.scale.x*3
             gorsttransforms.translate.y = transforms.translate.y
-            gorsttransforms.translate.z = (transforms.translate.z- transforms.scale.z * 2.5)+( transforms.scale.z * 5*i)
+            gorsttransforms.translate.z = transforms.translate.z-t2["force"].z*gorsttransforms.scale.x*3
             gorsttransforms.rotation.x  =  math.rad(-90)
-            gorsttransforms.rotation.y  = math.rad((180/(idletime/2)))
+            gorsttransforms.rotation.y  = math.rad(((90)/(idletime/2)))-t2["angle"]
             gorsttransforms.rotation.z  =0
-            if i==1 then
-                gorsttransforms.rotation.x = math.rad(-90)
-                gorsttransforms.rotation.y = math.rad(180)+math.rad((180/(idletime/2)))
-                gorsttransforms.rotation.z =0
-            end
            
-        end
+       
        r:UpdateGeometry()
     end
 
@@ -322,12 +332,12 @@ local objScript = [[
         radian=math.floor(radian)
         --LogMessage( radian)
         radian=math.random(0,radian)
-        local a=radian/180*math.pi
+        t2["angle"]=radian/180*math.pi
         --LogMessage(a)
     
-        --進んでいく方向の点を求める
-        t2["Movetransform"].x=t2["angleforce"].x*AngleRotationX(t2["CornerPosition"].x,t2["CornerPosition"].z,t2["linetransform"].x,t2["linetransform"].z,a)
-        t2["Movetransform"].z=t2["angleforce"].z*AngleRotationZ(t2["CornerPosition"].x,t2["CornerPosition"].z,t2["linetransform"].x,t2["linetransform"].z,a)
+        -- --進んでいく方向の点を求める
+        t2["Movetransform"].x=t2["angleforce"].x*AngleRotationX(t2["CornerPosition"].x,t2["CornerPosition"].z,t2["linetransform"].x,t2["linetransform"].z,t2["angle"])
+        t2["Movetransform"].z=t2["angleforce"].z*AngleRotationZ(t2["CornerPosition"].x,t2["CornerPosition"].z,t2["linetransform"].x,t2["linetransform"].z,t2["angle"])
         t2["Movetransform"].x=t2["Movetransform"].x+t2["linetransform"].x
         t2["Movetransform"].z=t2["Movetransform"].z+t2["linetransform"].z
     
@@ -337,30 +347,26 @@ local objScript = [[
 
         local transforms = GetComponent(this, "Transform")
         local Rigidbody = GetComponent(this, "RigidBody")
-        --Rigidbody:SetTranslation(t2["linetransform"].x,0.5,t2["linetransform"].z)
-        Rigidbody:SetTranslation(t2["linetransform"].x- t2["force"].x*speed,0.5,t2["linetransform"].z- t2["force"].z*speed)
+        Rigidbody:SetTranslation(t2["linetransform"].x,0.5,t2["linetransform"].z)
+        --Rigidbody:SetTranslation(t2["linetransform"].x- t2["force"].x*speed,0.5,t2["linetransform"].z- t2["force"].z*speed)
+        Rigidbody:SetRotation(0,t2["angle"],0)
         Rigidbody:UpdateGeometry()
 
     end
 
     function GorstSpawn()
-        for i = 0, 1 do
-            gorstentities[gorstnextid] = CreateEntity()
-            local gorsttransforms = GetComponent(gorstentities[gorstnextid], "Transform")
-            local meshes = GetComponent(gorstentities[gorstnextid], "Mesh")
-            meshes:Load("ghost_simple.fbx")
-            gorstnextid = gorstnextid + 1
-        end
+        gorstentities[0] = CreateEntity()
+        local gorsttransforms = GetComponent(gorstentities[0], "Transform")
+        local meshes = GetComponent(gorstentities[0], "Mesh")
+        meshes:Load("ghost_simple.fbx")
     end
 
     function GorstFollow()
-        for i = 0, gorstnextid-1 do
-            local transforms = GetComponent(this, "Transform")
-            local gorsttransforms = GetComponent(gorstentities[i], "Transform")
-            gorsttransforms.translate.x = transforms.translate.x
-            gorsttransforms.translate.y = transforms.translate.y
-            gorsttransforms.translate.z = (transforms.translate.z-transforms.scale.z * 2.5)+(transforms.scale.z * 5*i)
-        end
+        local transforms = GetComponent(this, "Transform")
+        local gorsttransforms = GetComponent(gorstentities[0], "Transform")
+        gorsttransforms.translate.x = transforms.translate.x-t2["force"].x* gorsttransforms.scale.x*3
+        gorsttransforms.translate.y = transforms.translate.y
+        gorsttransforms.translate.z = transforms.translate.z-t2["force"].z* gorsttransforms.scale.x*3
     end
 
     function Moveing()
@@ -372,15 +378,17 @@ local objScript = [[
         r:SetTranslation( transforms.translate.x, transforms.translate.y,  transforms.translate.z )
         
         if transforms.translate.z > endline or transforms.translate.z < -endline or  transforms.translate.x > endline or transforms.translate.x < -endline then
+            local s = GetComponent(AdHoc.Global.g_NailId, "Script")
+            s:Call("AddObjectCount")
             r:SetTranslation(t2["linetransform"].x- t2["force"].x*speed,0.5,t2["linetransform"].z- t2["force"].z*speed)
+            DestoryGorst()
+            DestroyEntity(this)
         end
     end
 
     function DestoryGorst()
-        for i = 0, gorstnextid-1 do
-            gorstnextid=0
-            DestroyEntity(gorstentities[i])
-        end
+        DestroyEntity(gorstentities[0])
+        isdeletegorst =true
     end
 
     function Particle()
@@ -428,6 +436,9 @@ function SpawnObject()
     AddComponent(entities[nextId], "RigidBody", "Box", "Dynamic")
     AddComponent(entities[nextId], "Script", objScript)
     local r = GetComponent(entities[nextId], "RigidBody")
+   
+    
+
     -- r:SetTranslation(positionX, 0.5, -1.0 )
     -- positionX = positionX + 0.2
     
@@ -439,13 +450,20 @@ function SpawnObject()
 end
 
 function FixedUpdate()
+    if (nextId-1)==10 then
+        local sq      = GetComponent(entities[nextId-1], "Script")
+        sq:Call("IsGolden", true)
+    end
     time = time + 1
-   if time > 60 and  positionX < 0.9 then
+   if time > 60 then
     local s = GetComponent(AdHoc.Global.g_NailId, "Script")
     local rotationFlg = s:Get("rotationFlg")
-    if rotationFlg == false then
-        SpawnObject()
-        time = 0
+    local maxobject = s:Get("maxobject")
+    if rotationFlg == false  then
+        if maxobject>nextId then
+            SpawnObject()
+            time = 0
+        end
     end
    end
 end
